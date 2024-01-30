@@ -71,7 +71,7 @@ module.exports = {
       "meta-7": "#FF6766",
       "meta-8": "#F0950C",
       "meta-9": "#E5E7EB",
-      success: "#219653",
+      success: "#2db35e",
       danger: "#D34053",
       warning: "#FFA70B",
     },

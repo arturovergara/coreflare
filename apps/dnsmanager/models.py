@@ -3,7 +3,7 @@ from django.db import models
 
 
 class Website(models.Model):
-    domain = models.CharField(max_length=253)
+    domain = models.CharField(max_length=253, unique=True)
     is_active = models.BooleanField(default=True)
     is_starred = models.BooleanField(default=False)
 

@@ -6,7 +6,7 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include("apps.dnsmanager.urls", namespace="console")),
+    path("", include("apps.dnsmanager.urls", namespace="dnsmanager")),
 ]
 
 if settings.DEBUG:

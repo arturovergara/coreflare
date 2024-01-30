@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+  <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <h2 class="text-title-md2 font-bold text-black">Websites</h2>
+      <nav>
+        <ol class="flex items-center gap-2">
+          <li>
+            <a href="{% url 'dnsmanager:home' %}" class="font-medium text-primary">Dashboard /</a>
+          </li>
+          <li class="font-medium">Websites</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="flex flex-col gap-10">
+      <div class="flex flex-wrap justify-end">
+        <a href="#"
+           class="inline-flex items-center justify-center gap-2.5 rounded-md bg-secondary py-3 px-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 xl:px-8">
+          <span class="icon-network"></span>
+          Add a site
+        </a>
+      </div>
+      <div class="container mx-auto" x-data="getWebsites()">
+        <input x-ref="searchInput"
+               x-model="search"
+               x-on:keydown.window.prevent.slash="$refs.searchInput.focus()"
+               placeholder="Search website..."
+               type="search"
+               class="block w-full rounded bg-gray-200 p-4 mb-10" />
+        <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-8">
+          <template x-for="website in filteredWebsites" :key="website.id">
+            <article x-on:click="location.href=website.url"
+                     class="rounded-lg border-2 border-bodydark2 pointer transform transition duration-500 cursor-pointer hover:border-primary">
+              <header class="flex items-center justify-between leading-tight p-2 md:p-4">
+                <h3 class="text-lg">
+                  <a class="no-underline text-black"
+                     :href="website.url"
+                     x-text="website.domain"></a>
+                </h3>
+              </header>
+              <footer class="flex items-center justify-between leading-none p-1 md:p-4">
+                <p x-show="website.isActive"
+                   class="font-medium align-middle text-success">
+                  <span class="icon-check text-lg"></span>
+                  Active
+                </p>
+                <p x-show="!website.isActive"
+                   class="font-medium align-middle text-danger">
+                  <span class="icon-cross text-lg"></span>
+                  Inactive
+                </p>
+              </footer>
+            </article>
+          </template>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+
+{% block morescripts %}
+  {# djlint:off #}
+  <script>
+    function getWebsites() {
+      return {
+        search: '',
+        allData: websitesData,
+        get filteredWebsites() {
+          if (this.search === '') {
+            return this.allData;
+          }
+          return this.allData.filter((website) => {
+            return website.domain
+              .replace(/ /g, '')
+              .toLowerCase()
+              .includes(this.search.replace(/ /g, '').toLowerCase());
+          });
+        }
+      };
+    }
+
+    const websitesData = [
+      {% for website in websites %}
+        {
+          id: {{ website.id }},
+          domain: "{{ website.domain }}",
+          isActive: {{ website.is_active|yesno:"true,false" }},
+          url: "{% url 'dnsmanager:website_list' %}"
+        },
+      {% endfor %}
+    ];
+</script>
+  {# djlint:on #}
+{% endblock morescripts %}

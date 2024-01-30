@@ -51,11 +51,17 @@
 .icon-edit:before {
   content: "\e903";
 }
+.icon-cross:before {
+  content: "\e904";
+}
 .icon-arrow-left:before {
   content: "\e908";
 }
 .icon-arrow-right:before {
   content: "\e909";
+}
+.icon-check:before {
+  content: "\e906";
 }
 .icon-delete:before {
   content: "\e905";

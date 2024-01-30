@@ -10,3 +10,4 @@ class TestView(TemplateView):
 
 class WebsiteListView(ListView):
     model = Website
+    context_object_name = "websites"
