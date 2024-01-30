@@ -1,0 +1,40 @@
+version: "3"
+services:
+  nginx:
+    image: nginx:1.25-alpine
+    labels:
+      name: coreflare_nginx
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
+    volumes:
+      - coreflare_staticfiles:/app/staticfiles
+      - coreflare_media:/app/media
+      - ./compose/production/nginx/coreflare.conf:/etc/nginx/nginx.conf:ro
+      - ./compose/production/nginx/ssl.conf:/etc/nginx/vhost.ssl.conf:ro
+      - ./compose/production/nginx/certs/coreflare.cert.pem:/etc/nginx/ssl/coreflare.cert.pem:ro
+      - ./compose/production/nginx/certs/coreflare.key.pem:/etc/nginx/ssl/coreflare.key.pem:ro
+    depends_on:
+      - app
+  app:
+    build:
+      context: .
+      dockerfile: ./compose/production/app/Dockerfile
+    image: coreflare_production_app
+    labels:
+      name: coreflare_app
+    command: /app/start.sh
+    restart: unless-stopped
+    environment:
+      - DJANGO_ADMIN_URL=${DJANGO_ADMIN_URL}
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DJANGO_SETTINGS_MODULE=config.settings.production
+    volumes:
+      - coreflare_staticfiles:/app/coreflare/staticfiles
+      - coreflare_media:/app/coreflare/media
+      - "./service-data/sqlite-data/:/app/sqlite-data"
+volumes:
+  coreflare_staticfiles:
+  coreflare_media:

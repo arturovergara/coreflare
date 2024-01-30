@@ -1,0 +1,13 @@
+{# djlint:off #}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    {% for message in messages %}
+      Toastify({
+        text: "{{ message }}",
+        gravity: "bottom",
+        duration: 4000
+      }).showToast();
+    {% endfor %}
+  });
+</script>
+{# djlint:on #}

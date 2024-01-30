@@ -1,0 +1,14 @@
+{# djlint:off #}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    {% for field in form %}
+      {% for error in field.errors %}
+        {% include "partials/error_notification.js" %}
+      {% endfor %}
+    {% endfor %}
+    {% for error in form.non_field_errors %}
+      {% include "partials/error_notification.js" %}
+    {% endfor %}
+  });
+</script>
+{# djlint:on #}

@@ -1,0 +1,19 @@
+version: "3"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./compose/development/app/Dockerfile
+    image: coreflare_development_app
+    labels:
+      name: coreflare
+    stdin_open: true
+    tty: true
+    command: bash
+    ports:
+      - 8000:8000
+    environment:
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
+      - DJANGO_SETTINGS_MODULE=config.settings.development
+    volumes:
+      - ./:/app
