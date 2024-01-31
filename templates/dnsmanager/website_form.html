@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% load widget_tweaks %}
+{% load static %}
+
+{% block content %}
+  {% if form.errors %}
+    {% include "partials/error_form_notification.html" %}
+  {% endif %}
+  <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <h2 class="text-title-md2 font-bold text-black">Add your website or application to Coreflare</h2>
+      <nav>
+        <ol class="flex items-center gap-2">
+          <li>
+            <a href="{% url 'dnsmanager:home' %}" class="font-medium text-primary">Dashboard /</a>
+          </li>
+          <li>
+            <a href="{% url 'dnsmanager:website_list' %}"
+               class="font-medium text-primary">Websites /</a>
+          </li>
+          <li class="font-medium">Add a site</li>
+        </ol>
+      </nav>
+    </div>
+    <form method="post" enctype="multipart/form-data">
+      <div class="flex flex-col gap-9">
+        <div class="rounded-sm border border-stroke bg-white shadow-default">
+          <div class="border-b border-stroke py-4 px-6.5">
+            <h3 class="font-medium text-black">Enter your domain</h3>
+          </div>
+          <div class="flex flex-col gap-5.5 p-6.5">
+            <p>
+              This will be the name of the space where you apply Coreflare configurations and monitor impact on your website or application.
+            </p>
+            <div>
+              <label class="mb-3 block font-medium text-sm text-black">Enter domain name (example.com)</label>
+              {% render_field form.domain class+="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter" %}
+            </div>
+            <div class="flex justify-end mt-10">
+              {# Include the hidden fields in the form #}
+              {% for hidden_field in form.hidden_fields %}{{ hidden_field }}{% endfor %}
+              {% csrf_token %}
+              <button type="submit"
+                      class="flex justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90">
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+{% endblock content %}
