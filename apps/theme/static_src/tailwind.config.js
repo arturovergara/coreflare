@@ -66,7 +66,7 @@ module.exports = {
       "meta-2": "#e9f7fb",
       "meta-3": "#10B981",
       "meta-4": "#313D4A",
-      "meta-5": "#259AE6",
+      "meta-5": "#0051c3",
       "meta-6": "#FFBA00",
       "meta-7": "#FF6766",
       "meta-8": "#F0950C",

@@ -3,5 +3,13 @@ from django.contrib import admin
 
 from .models import Record, Website
 
-admin.site.register(Website)
-admin.site.register(Record)
+
+class RecordInline(admin.TabularInline):
+    model = Record
+    extra = 1
+
+
+@admin.register(Website)
+class WebsiteAdmin(admin.ModelAdmin):
+    list_display = ("domain", "is_active")
+    inlines = (RecordInline,)

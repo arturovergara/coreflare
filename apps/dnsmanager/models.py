@@ -7,6 +7,9 @@ class Website(models.Model):
     is_active = models.BooleanField(default=True)
     is_starred = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.domain
+
 
 class Record(models.Model):
     class RecordTypes(models.IntegerChoices):
@@ -21,7 +24,7 @@ class Record(models.Model):
     record_type = models.PositiveSmallIntegerField(choices=RecordTypes.choices)
     name = models.CharField(max_length=63)
     value = models.CharField(max_length=255)
-    observation = models.TextField(null=True, blank=True)
+    observation = models.CharField(max_length=100, null=True, blank=True)
     website = models.ForeignKey(
         "Website", on_delete=models.CASCADE, related_name="records"
     )

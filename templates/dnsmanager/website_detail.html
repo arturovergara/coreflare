@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <h2 class="text-title-md2 font-bold text-black">{{ website.domain }}</h2>
+      <nav>
+        <ol class="flex items-center gap-2">
+          <li>
+            <a href="{% url 'dnsmanager:home' %}" class="font-medium text-meta-5">Dashboard /</a>
+          </li>
+          <li>
+            <a href="{% url 'dnsmanager:website_list' %}"
+               class="font-medium text-meta-5">Websites /</a>
+          </li>
+          <li class="font-medium">{{ website.domain }}</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="flex justify-end gap-5 mb-5">
+      <a href="#" class="text-center font-medium text-meta-5 hover:underline">Import</a>
+      <a href="#" class="text-center font-medium text-meta-5 hover:underline">Export</a>
+    </div>
+    <div class="flex flex-col gap-10 mt-5">
+      <div class="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default sm:px-7.5 xl:pb-1">
+        <div class="flex justify-between mb-4">
+          <div>
+            <h2 class="text-2xl mb-4">
+              DNS Managment for <strong>{{ website.domain }}</strong>
+            </h2>
+            <p>Review, add, and edit DNS records. Edits will go into effect once saved.</p>
+          </div>
+          <a href="#"
+             class="inline-flex items-center justify-center gap-2.5 rounded-md bg-secondary py-3 px-4 text-center font-medium text-white max-h-12 hover:bg-opacity-90 lg:px-6 xl:px-8">
+            <span class="icon-tree"></span>
+            Add a DNS record
+          </a>
+        </div>
+        <div class="max-w-full overflow-x-auto">
+          <div x-data="getRecords()"
+               x-init="initData(); $watch('searchInput', value => { search(value) })"
+               class="bg-white p-5 shadow-md w-full flex flex-col">
+            <div class="flex justify-between items-center">
+              <div class="flex space-x-2 items-center">
+                <p>Show</p>
+                <select x-model="view" @change="changeView()">
+                  <option value="5">5</option>
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+              </div>
+              <div>
+                <input x-model="searchInput"
+                       type="search"
+                       class="px-2 py-1 border rounded focus:outline-none"
+                       placeholder="Search DNS Records...">
+              </div>
+            </div>
+            <table class="w-full table-auto mt-5">
+              <thead>
+                <tr class="bg-gray-2 text-left">
+                  <th class="py-4 px-4 font-medium text-black">Type</th>
+                  <th class="py-4 px-4 font-medium text-black">Name</th>
+                  <th class="py-4 px-4 font-medium text-black">Content</th>
+                  <th class="py-4 px-4 font-medium text-black">TTL</th>
+                  <th class="py-4 px-4 font-medium text-black">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="(record, i) in records" :key="record.id">
+                  <tr x-show="checkView(i + 1)">
+                    <td class="border-b border-[#eee] py-5 px-4">
+                      <p x-text="record.type" class="text-black"></p>
+                    </td>
+                    <td class="border-b border-[#eee] py-5 px-4">
+                      <p x-text="record.name" class="text-black"></p>
+                    </td>
+                    <td class="border-b border-[#eee] py-5 px-4">
+                      <p x-text="record.value" class="text-black"></p>
+                    </td>
+                    <td class="border-b border-[#eee] py-5 px-4">
+                      <p class="text-black">Auto</p>
+                    </td>
+                    <td class="border-b border-[#eee] py-5 px-4">
+                      <p class="inline-flex rounded-full bg-success bg-opacity-10 py-1 px-3 text-sm font-medium text-primary">Edit</p>
+                    </td>
+                  </tr>
+                </template>
+                <tr x-show="isEmpty()">
+                  <td colspan="5" class="text-center py-3 text-gray-900 text-sm">No DNS Records.</td>
+                </tr>
+              </tbody>
+            </table>
+            <ul class="inline-flex items-center gap-1 mt-5">
+              <li>
+                <button type="button"
+                        @click.prevent="changePage(1)"
+                        class="flex justify-center px-3.5 py-2 rounded transition text-muted hover:text-primary border border-black/10 hover:border-primary">
+                  First
+                </button>
+              </li>
+              <li>
+                <button type="button"
+                        @click="changePage(currentPage - 1)"
+                        class="flex justify-center px-3.5 py-2 rounded transition text-muted hover:text-primary border border-black/10 hover:border-primary">
+                  &lt;
+                </button>
+              </li>
+              <template x-for="page in pages">
+                <li>
+                  <button @click="changePage(page)"
+                          type="button"
+                          class="flex justify-center px-3.5 py-2 rounded transition text-muted hover:text-primary border border-black/10 hover:border-primary"
+                          x-bind:class="{ 'text-primary border-primary': currentPage === page }">
+                    <span x-text="page">1</span>
+                  </button>
+                </li>
+              </template>
+              <li>
+                <button type="button"
+                        @click="changePage(currentPage + 1)"
+                        class="flex justify-center px-3.5 py-2 rounded transition text-muted hover:text-primary border border-black/10 hover:border-primary">
+                  &gt;
+                </button>
+              </li>
+              <li>
+                <button type="button"
+                        @click.prevent="changePage(pagination.lastPage)"
+                        class="flex justify-center px-3.5 py-2 rounded transition text-muted hover:text-primary border border-black/10 hover:border-primary">
+                  Last
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="rounded-sm border border-danger bg-white px-5 pt-6 pb-2.5 shadow-default sm:px-7.5 xl:pb-1">
+        <h2 class="text-danger font-medium text-2xl mb-4">Danger Zone</h2>
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="font-medium">Deactivate this website</h3>
+            <p>Mark this website as inactive.</p>
+          </div>
+          <button class="rounded-md border border-danger px-6 py-2 text-center font-medium text-danger hover:bg-danger hover:text-white">Deactivate this website</button>
+        </div>
+        <hr class="mb-4 " />
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="font-medium">Delete this website</h3>
+            <p>Once you delete a website, there is no going back. Please be certain.</p>
+          </div>
+          <button class="rounded-md border border-danger px-6 py-2 text-center font-medium text-danger hover:bg-danger hover:text-white">Delete this website</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+
+{% block morescripts %}
+  {# djlint:off #}
+  <script>
+    function getRecords() {
+      return {
+        records: [],
+        view: 5,
+        searchInput: "",
+        pages: [],
+        offset: 5,
+        pagination: {
+          total: recordsData.length,
+          lastPage: Math.ceil(recordsData.length / 5),
+          perPage: 5,
+          currentPage: 1,
+          from: 1,
+          to: 1 * 5
+        },
+        currentPage: 1,
+        initData() {
+          this.records = recordsData
+          this.showPages()
+        },
+        checkView(index) {
+          return index > this.pagination.to || index < this.pagination.from ? false : true
+        },
+        checkPage(item) {
+          return item <= this.currentPage + 5;
+        },
+        search(searchTerm) {
+          if (searchTerm === '') {
+            this.records = recordsData;
+          }
+          else {
+            this.records = recordsData.filter((record) => {
+              return record.name
+                .replace(/ /g, '')
+                .toLowerCase()
+                .includes(searchTerm.replace(/ /g, '').toLowerCase());
+            });
+          }
+
+          this.changePage(1);
+          this.showPages();
+        },
+        changePage(page) {
+          if (page >= 1 && page <= this.pagination.lastPage) {
+            this.currentPage = page;
+            const total = this.records.length;
+            const lastPage = Math.ceil(total / this.view) || 1;
+            const from = (page - 1) * this.view + 1;
+            let to = page * this.view;
+
+            if (page === lastPage) {
+              to = total;
+            }
+
+            this.pagination.total = total;
+            this.pagination.lastPage = lastPage;
+            this.pagination.perPage = this.view;
+            this.pagination.currentPage = page;
+            this.pagination.from = from;
+            this.pagination.to = to;
+            this.showPages();
+          }
+        },
+        showPages() {
+          const pages = [];
+          let from = this.pagination.currentPage - Math.ceil(this.offset / 2);
+
+          if (from < 1) {
+            from = 1;
+          }
+
+          let to = from + this.offset - 1;
+
+          if (to > this.pagination.lastPage) {
+            to = this.pagination.lastPage;
+          }
+
+          while (from <= to) {
+            pages.push(from);
+            from++;
+          }
+
+          this.pages = pages;
+        },
+        changeView() {
+          this.changePage(1);
+          this.showPages();
+        },
+        isEmpty() {
+          return this.pagination.total <= 0;
+        }
+      }
+    }
+
+    const recordsData = [
+      {% for record in website.records.all %}
+        {
+          id: {{ record.id }},
+          type: "{{ record.get_record_type_display }}",
+          name: "{{ record.name }}",
+          value: "{{ record.value }}"
+        },
+      {% endfor %}
+    ];
+</script>
+  {# djlint:on #}
+{% endblock morescripts %}

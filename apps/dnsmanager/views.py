@@ -1,6 +1,6 @@
 # Django Imports
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView, TemplateView
+from django.views.generic import CreateView, DetailView, ListView, TemplateView
 
 from .forms import WebsiteForm
 from .models import Website
@@ -20,3 +20,10 @@ class WebsiteCreateView(CreateView):
     form_class = WebsiteForm
     success_url = reverse_lazy("dnsmanager:website_list")
     success_message = "Website was created successfully!"
+
+
+class WebsiteDetailView(DetailView):
+    model = Website
+    context_object_name = "website"
+    slug_field = "domain"
+    slug_url_kwarg = "domain"
